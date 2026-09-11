@@ -32,11 +32,11 @@ export function PortraitPortal() {
     const box = boxRef.current
     if (!box) return
 
-    // Hərəkət azaldılmış rejimdə istənmir — portal bağlı qalır, yalnız ön
-    // foto görünür. Toxunma cihazları isə İNDİ dəstəklənir: pointermove
-    // barmaq sürüşdürmədə də atılır, portal barmağın arxasınca açılır.
+    // Toxunma cihazında kursor yoxdur, hərəkət azaldılmış rejimdə isə
+    // istənmir — hər iki halda portal bağlı qalır, yalnız ön foto görünür.
+    const fine = window.matchMedia('(pointer: fine)').matches
     const still = window.matchMedia('(prefers-reduced-motion: reduce)').matches
-    if (still) return
+    if (!fine || still) return
 
     // Hədəf dəyərlər (kursor) və cari dəyərlər (ekranda görünən).
     let targetX = 0
@@ -92,24 +92,13 @@ export function PortraitPortal() {
       frame = requestAnimationFrame(tick)
     }
 
-    // Toxunma ilə: siçanın fərqli olaraq barmaq götürüləndə "hover"dan
-    // avtomatik çıxmır — bunu əllə bağlamaq lazımdır, yoxsa portal barmaq
-    // qalxandan sonra da açıq qalar.
-    const onEnd = () => {
-      targetR = 0
-    }
-
     window.addEventListener('pointermove', onMove, { passive: true })
-    window.addEventListener('pointerup', onEnd, { passive: true })
-    window.addEventListener('pointercancel', onEnd, { passive: true })
     window.addEventListener('scroll', measure, { passive: true })
     window.addEventListener('resize', measure)
     frame = requestAnimationFrame(tick)
 
     return () => {
       window.removeEventListener('pointermove', onMove)
-      window.removeEventListener('pointerup', onEnd)
-      window.removeEventListener('pointercancel', onEnd)
       window.removeEventListener('scroll', measure)
       window.removeEventListener('resize', measure)
       cancelAnimationFrame(frame)
