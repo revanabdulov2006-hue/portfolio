@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { hero } from '@/content/landing'
 
 /**
@@ -28,15 +28,21 @@ const HOVER_PADDING = 140
 export function PortraitPortal() {
   const boxRef = useRef<HTMLDivElement>(null)
 
+  // Toxunma cihazında kursor yoxdur, hərəkət azaldılmış rejimdə isə
+  // istənmir — hər iki halda maska heç tətbiq olunmur (aşağıda), ön foto
+  // sadə, maskasız göstərilir. Mobil brauzerlərin bəzilərində sıfıra yaxın
+  // radiuslu radial-gradient maskası gözlənilməz render olunur (arxadakı
+  // real foto görünür) — ən etibarlı həll maskanı belə hallarda heç
+  // yaratmamaqdır.
+  const [interactive] = useState(
+    () =>
+      window.matchMedia('(pointer: fine)').matches &&
+      !window.matchMedia('(prefers-reduced-motion: reduce)').matches,
+  )
+
   useEffect(() => {
     const box = boxRef.current
-    if (!box) return
-
-    // Toxunma cihazında kursor yoxdur, hərəkət azaldılmış rejimdə isə
-    // istənmir — hər iki halda portal bağlı qalır, yalnız ön foto görünür.
-    const fine = window.matchMedia('(pointer: fine)').matches
-    const still = window.matchMedia('(prefers-reduced-motion: reduce)').matches
-    if (!fine || still) return
+    if (!box || !interactive) return
 
     // Hədəf dəyərlər (kursor) və cari dəyərlər (ekranda görünən).
     let targetX = 0
@@ -103,18 +109,19 @@ export function PortraitPortal() {
       window.removeEventListener('resize', measure)
       cancelAnimationFrame(frame)
     }
-  }, [])
+  }, [interactive])
 
   // Radiusun 46%-inə qədər tam şəffaf, sonra kənara doğru uzun keçid —
   // deşiyin kənarı kəskin dairə deyil, işıq ləkəsi kimi əriyir.
   //
-  // Son dayanacaq ağ (#fff), qara YOX: bəzi mobil brauzerlər (Safari)
-  // -webkit-mask-image-i "luminance" rejimində yozur, orada qara "gizlət"
-  // demək olur və portal tərsinə açılır — real foto özbaşına görünür. Ağ
-  // rəng həm alfa, həm luminance rejimində eyni nəticəni ("göstər") verir.
-  const portalMask =
-    'radial-gradient(circle var(--pr, 0px) at var(--px, 50%) var(--py, 50%),' +
-    ' transparent 0%, transparent 46%, #fff 100%)'
+  // Yalnız `interactive` olanda (siçanlı cihaz) tətbiq olunur. Toxunma
+  // cihazlarında bu tamam çıxarılır — bəzi mobil brauzerlər sıfıra yaxın
+  // radiuslu radial-gradient-i gözlənilməz render edir (ön şəkil əvəzinə
+  // arxadakı real foto görünür); ən etibarlı həll heç maska yaratmamaqdır.
+  const portalMask = interactive
+    ? 'radial-gradient(circle var(--pr, 0px) at var(--px, 50%) var(--py, 50%),' +
+      ' transparent 0%, transparent 46%, #fff 100%)'
+    : undefined
 
   return (
     <div
