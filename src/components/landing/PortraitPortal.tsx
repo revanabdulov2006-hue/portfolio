@@ -32,11 +32,11 @@ export function PortraitPortal() {
     const box = boxRef.current
     if (!box) return
 
-    // Toxunma cihazında kursor yoxdur, hərəkət azaldılmış rejimdə isə
-    // istənmir — hər iki halda portal bağlı qalır, yalnız ön foto görünür.
-    const fine = window.matchMedia('(pointer: fine)').matches
+    // Hərəkət azaldılmış rejimdə istənmir — portal bağlı qalır, yalnız ön
+    // foto görünür. Toxunma cihazları isə İNDİ dəstəklənir: pointermove
+    // barmaq sürüşdürmədə də atılır, portal barmağın arxasınca açılır.
     const still = window.matchMedia('(prefers-reduced-motion: reduce)').matches
-    if (!fine || still) return
+    if (still) return
 
     // Hədəf dəyərlər (kursor) və cari dəyərlər (ekranda görünən).
     let targetX = 0
@@ -92,13 +92,24 @@ export function PortraitPortal() {
       frame = requestAnimationFrame(tick)
     }
 
+    // Toxunma ilə: siçanın fərqli olaraq barmaq götürüləndə "hover"dan
+    // avtomatik çıxmır — bunu əllə bağlamaq lazımdır, yoxsa portal barmaq
+    // qalxandan sonra da açıq qalar.
+    const onEnd = () => {
+      targetR = 0
+    }
+
     window.addEventListener('pointermove', onMove, { passive: true })
+    window.addEventListener('pointerup', onEnd, { passive: true })
+    window.addEventListener('pointercancel', onEnd, { passive: true })
     window.addEventListener('scroll', measure, { passive: true })
     window.addEventListener('resize', measure)
     frame = requestAnimationFrame(tick)
 
     return () => {
       window.removeEventListener('pointermove', onMove)
+      window.removeEventListener('pointerup', onEnd)
+      window.removeEventListener('pointercancel', onEnd)
       window.removeEventListener('scroll', measure)
       window.removeEventListener('resize', measure)
       cancelAnimationFrame(frame)
@@ -107,9 +118,14 @@ export function PortraitPortal() {
 
   // Radiusun 46%-inə qədər tam şəffaf, sonra kənara doğru uzun keçid —
   // deşiyin kənarı kəskin dairə deyil, işıq ləkəsi kimi əriyir.
+  //
+  // Son dayanacaq ağ (#fff), qara YOX: bəzi mobil brauzerlər (Safari)
+  // -webkit-mask-image-i "luminance" rejimində yozur, orada qara "gizlət"
+  // demək olur və portal tərsinə açılır — real foto özbaşına görünür. Ağ
+  // rəng həm alfa, həm luminance rejimində eyni nəticəni ("göstər") verir.
   const portalMask =
     'radial-gradient(circle var(--pr, 0px) at var(--px, 50%) var(--py, 50%),' +
-    ' transparent 0%, transparent 46%, #000 100%)'
+    ' transparent 0%, transparent 46%, #fff 100%)'
 
   return (
     <div
