@@ -1,0 +1,324 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* --- Palitra: ağ / mavi / krem (dar palitra, şablon görüntüsündən uzaq) --- */
+    --background: 0 0% 100%;
+    --foreground: 218 42% 12%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 218 42% 12%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 218 42% 12%;
+
+    /* Əsas mavi */
+    --primary: 217 91% 46%;
+    --primary-foreground: 0 0% 100%;
+
+    /* Yumşaq mavi fon */
+    --secondary: 213 60% 96%;
+    --secondary-foreground: 218 42% 16%;
+
+    --muted: 214 32% 95%;
+    --muted-foreground: 217 15% 45%;
+
+    --accent: 213 70% 94%;
+    --accent-foreground: 217 91% 32%;
+
+    --destructive: 0 72% 48%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 214 30% 90%;
+    --input: 214 30% 90%;
+    --ring: 217 91% 46%;
+
+    /* Krem — yalnız vurğu bölmələri üçün */
+    --cream: 40 46% 95%;
+    --cream-foreground: 30 25% 20%;
+
+    --radius: 0.9rem;
+  }
+
+  /*
+   * Tünd tema — YALNIZ ictimai səhifələrdə (ana səhifə, təlimlər, kurs detalı,
+   * giriş/qeydiyyat). Sinif SiteLayout tərəfindən route-a görə qoyulur.
+   * Bütün tokenlər burada yenidən təyin olunur, ona görə mövcud komponentlər
+   * (Navbar, Footer, Button, Badge, Input) heç bir dəyişiklik olmadan çevrilir.
+   *
+   * "Mənim təlimlərim", dərs paneli və admin bu sinfi ALMIR — onlar ağ/mavi qalır.
+   */
+  .dark {
+    --background: 0 0% 5%;
+    --foreground: 206 31% 88%;
+
+    --card: 0 0% 8%;
+    --card-foreground: 206 31% 88%;
+
+    --popover: 0 0% 8%;
+    --popover-foreground: 206 31% 88%;
+
+    /* Tünd fonda mavi bir az açılır ki, kontrast saxlansın */
+    --primary: 213 90% 62%;
+    --primary-foreground: 213 60% 8%;
+
+    --secondary: 210 14% 13%;
+    --secondary-foreground: 206 31% 88%;
+
+    --muted: 210 12% 12%;
+    --muted-foreground: 206 14% 62%;
+
+    --accent: 213 40% 17%;
+    --accent-foreground: 213 80% 78%;
+
+    --destructive: 0 72% 60%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 206 12% 20%;
+    --input: 206 12% 22%;
+    --ring: 213 90% 62%;
+
+    /* Krem tünd fonda isti vurğu kimi qalır */
+    --cream: 36 14% 14%;
+    --cream-foreground: 40 34% 80%;
+  }
+
+  * {
+    @apply border-border;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    -webkit-tap-highlight-color: transparent;
+    /* Nəhəng başlıqlar və marquee sətirləri üfüqi sürüşmə yaratmasın */
+    overflow-x: clip;
+  }
+
+  body {
+    overflow-x: clip;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-feature-settings: 'ss01', 'cv01';
+  }
+
+  /*
+   * Halqa+nöqtə kursoru işə düşəndə sistem oxu gizlədilir — əks halda iki
+   * kursor birdən görünür. Sinfi LiquidCursor qoyur və yalnız siçanlı
+   * cihazda: toxunma ekranında və `prefers-reduced-motion`-da sinif heç
+   * verilmir, ona görə sistem kursoru toxunulmaz qalır.
+   */
+  .has-custom-cursor,
+  .has-custom-cursor * {
+    cursor: none;
+  }
+
+  /*
+   * Nəhəng başlıqların qradiyent doldurulması.
+   * Tünd fonda soyuq mavi-boz, ağ bölmələrdə tünd lacivərd-mavi.
+   */
+  .display-gradient {
+    background: linear-gradient(180deg, hsl(212 18% 42%) 0%, hsl(206 45% 82%) 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  /*
+   * Sıra nömrələri üçün konturlu rəqəm. Hover-də içi dolur — siyahını
+   * jack-3d-dəki nəhəng rəqəmlərdən daha "redaksiya" hissi verən edir.
+   * @supports olmasa rəqəm görünməz qalardı, ona görə şərtə salınıb.
+   */
+  @supports (-webkit-text-stroke: 1px currentColor) {
+    .num-stroke {
+      color: transparent;
+      -webkit-text-stroke: 1.5px hsl(var(--foreground) / 0.32);
+      transition:
+        color 400ms cubic-bezier(0.16, 1, 0.3, 1),
+        -webkit-text-stroke-color 400ms cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .group:hover .num-stroke,
+    .group:focus-visible .num-stroke {
+      color: hsl(var(--foreground));
+      -webkit-text-stroke-color: transparent;
+    }
+  }
+
+  .display-gradient-ink {
+    background: linear-gradient(180deg, hsl(218 42% 12%) 0%, hsl(217 91% 40%) 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  /*
+   * ─── Kinetik menyu ──────────────────────────────────────────────────
+   * Üç panel bir-birinin ardınca soldan sürüşür. Sonuncu — görünən —
+   * panel mavi qradiyentdir; ilk ikisi ondan bir az açıq/tünd variantdır
+   * ki, sürüşmə anında qatlar bir-birindən seçilsin.
+   *
+   * `--primary` HSL üçlüyüdür (rəng deyil), ona görə hər yerdə
+   * `hsl(var(--primary) / a)` formasında yazılır.
+   */
+  .menu-panel-a {
+    background: linear-gradient(150deg, hsl(var(--primary) / 0.55) 0%, hsl(var(--primary) / 0.2) 100%);
+  }
+
+  .menu-panel-b {
+    background: linear-gradient(150deg, hsl(var(--primary) / 0.8) 0%, hsl(var(--primary) / 0.45) 100%);
+  }
+
+  .menu-panel-c {
+    background:
+      radial-gradient(120% 80% at 0% 0%, hsl(var(--primary) / 0.75) 0%, transparent 60%),
+      linear-gradient(155deg, hsl(217 91% 34%) 0%, hsl(213 90% 52%) 55%, hsl(206 85% 30%) 100%);
+  }
+
+  /*
+   * Sətirlər normalda ağdır, üstünə gələndə tək-tək mavi yanır.
+   * Mavi qradiyent fonunun üstündə `--primary` özü kifayət qədər
+   * seçilmir, ona görə vurğu rəngi daha parlaq və doymuş götürülür.
+   */
+  .menu-link {
+    transition: color 320ms cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .menu-link:hover,
+  .menu-link:focus-visible,
+  .menu-list-item:hover .menu-link {
+    color: hsl(203 100% 72%);
+  }
+
+  /*
+   * ─── Kinematik footer ───────────────────────────────────────────────
+   * Orijinal komponent `color-mix(in oklch, var(--foreground) 3%, transparent)`
+   * istifadə edirdi. Bu layihədə tokenlər tam rəng deyil, HSL üçlüyüdür
+   * (`--foreground: 206 31% 88%`), ona görə color-mix sınırdı və effektlərin
+   * hamısı görünməz qalırdı. `hsl(var(--token) / a)` formasına keçirilib.
+   */
+  @keyframes footer-breathe {
+    from {
+      transform: translate(-50%, -50%) scale(1);
+      opacity: 0.6;
+    }
+    to {
+      transform: translate(-50%, -50%) scale(1.1);
+      opacity: 1;
+    }
+  }
+
+  @keyframes footer-marquee {
+    from {
+      transform: translateX(0);
+    }
+    to {
+      transform: translateX(-50%);
+    }
+  }
+
+  .animate-footer-breathe {
+    animation: footer-breathe 8s ease-in-out infinite alternate;
+  }
+
+  .animate-footer-marquee {
+    animation: footer-marquee 40s linear infinite;
+  }
+
+  .footer-bg-grid {
+    background-size: 60px 60px;
+    background-image:
+      linear-gradient(to right, hsl(var(--foreground) / 0.04) 1px, transparent 1px),
+      linear-gradient(to bottom, hsl(var(--foreground) / 0.04) 1px, transparent 1px);
+    mask-image: linear-gradient(to bottom, transparent, #000 30%, #000 70%, transparent);
+    -webkit-mask-image: linear-gradient(to bottom, transparent, #000 30%, #000 70%, transparent);
+  }
+
+  .footer-aurora {
+    background: radial-gradient(
+      circle at 50% 50%,
+      hsl(var(--primary) / 0.18) 0%,
+      hsl(var(--accent) / 0.15) 40%,
+      transparent 70%
+    );
+  }
+
+  /* Şüşə pill — kənar işıq + daxili kölgə ilə həcm hissi */
+  .footer-pill {
+    background: linear-gradient(
+      145deg,
+      hsl(var(--foreground) / 0.05) 0%,
+      hsl(var(--foreground) / 0.02) 100%
+    );
+    border: 1px solid hsl(var(--foreground) / 0.1);
+    box-shadow:
+      0 10px 30px -10px hsl(var(--background) / 0.5),
+      inset 0 1px 1px hsl(var(--foreground) / 0.1);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .footer-pill:hover {
+    background: linear-gradient(
+      145deg,
+      hsl(var(--foreground) / 0.1) 0%,
+      hsl(var(--foreground) / 0.03) 100%
+    );
+    border-color: hsl(var(--foreground) / 0.22);
+    box-shadow:
+      0 20px 40px -10px hsl(var(--background) / 0.7),
+      inset 0 1px 1px hsl(var(--foreground) / 0.2);
+    color: hsl(var(--foreground));
+  }
+
+  /* Nəhəng fon adı — konturlu, yuxarıdan aşağı sönən.
+     Ölçü tam ada görə hesablanıb: 26vw yalnız «RƏVAN» üçün idi, 15 simvollu
+     tam ad həmin ölçüdə ekrandan üç dəfə daşırdı. */
+  .footer-giant-text {
+    font-size: clamp(2rem, 8.5vw, 9rem);
+    line-height: 0.75;
+    font-weight: 900;
+    letter-spacing: -0.03em;
+    color: transparent;
+    -webkit-text-stroke: 1px hsl(var(--foreground) / 0.07);
+    background: linear-gradient(
+      180deg,
+      hsl(var(--foreground) / 0.14) 0%,
+      hsl(var(--foreground) / 0.03) 100%
+    );
+    -webkit-background-clip: text;
+    background-clip: text;
+  }
+
+  /* Metal parıltılı başlıq */
+  .footer-heading {
+    background: linear-gradient(
+      180deg,
+      hsl(var(--foreground)) 0%,
+      hsl(var(--foreground) / 0.4) 100%
+    );
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    filter: drop-shadow(0 0 20px hsl(var(--foreground) / 0.15));
+  }
+
+  /* Hərəkət azaldılması seçimi olan istifadəçilər üçün */
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}
